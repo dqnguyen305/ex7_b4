@@ -1,0 +1,35 @@
+name: Restaurant Service CI (Self-hosted)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_on_self_hosted:
+    runs-on: [self-hosted, quickbite] # Phải khớp với RUNNER_LABELS trong docker-compose.yml
+    defaults:
+      run:
+        working-directory: ./banking
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: restaurant-service-artifact
+          path: build/libs/*.jar
+          retention-days: 3
